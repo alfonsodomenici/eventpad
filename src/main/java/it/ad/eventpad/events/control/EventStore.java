@@ -5,17 +5,25 @@
  */
 package it.ad.eventpad.events.control;
 
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import it.ad.eventpad.events.entity.Event;
 import it.ad.eventpad.events.entity.EventDateSummary;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -26,6 +34,9 @@ import javax.persistence.PersistenceContext;
 @Stateless
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
 public class EventStore {
+
+    @Inject
+    Logger LOG;
 
     @PersistenceContext(name = "eventpad")
     private EntityManager em;
@@ -49,10 +60,11 @@ public class EventStore {
                 .getResultList();
     }
 
-    public List<EventDateSummary> dateSummary(){
+    public List<EventDateSummary> dateSummary() {
         return em.createQuery("select new it.ad.eventpad.events.entity.EventDateSummary(e.quando,e.luogo) from Event e GROUP BY e.quando, e.luogo order by e.quando", EventDateSummary.class)
                 .getResultList();
     }
+
     public List<Event> byDate(LocalDate date) {
         return em.createQuery("select e from Event e where e.quando= :quando", Event.class)
                 .setParameter("quando", date)
@@ -78,13 +90,13 @@ public class EventStore {
     }
 
     public void importDefaultEvents() throws IOException {
-        File file = new File(Thread.currentThread().getContextClassLoader()
-                .getResource("events.csv").getFile());
-
-        List<String> all = Files.readAllLines(file.toPath());
-        all.stream()
-                .filter(v -> !v.isEmpty())
-                .map(v -> Event.fromCsv(v))
-                .forEach(this::save);
+        LOG.log(Level.INFO, "start importDefaultEvents");
+        try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("events.csv"); 
+            BufferedReader br = new BufferedReader(new InputStreamReader(is))){
+            br.lines()
+                    .filter(v -> !v.isEmpty())
+                    .map(v -> Event.fromCsv(v))
+                    .forEach(this::save);
+        }
     }
 }
