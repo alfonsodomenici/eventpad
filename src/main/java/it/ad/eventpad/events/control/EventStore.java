@@ -78,6 +78,7 @@ public class EventStore {
     }
 
     public void removeBooking(Long id) {
+        LOG.log(Level.INFO, id);
         em.createQuery("update Event e set e.prenotazioni= e.prenotazioni - 1 where e.id= :id")
                 .setParameter("id", id)
                 .executeUpdate();

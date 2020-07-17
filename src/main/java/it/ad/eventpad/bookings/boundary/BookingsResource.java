@@ -51,9 +51,14 @@ public class BookingsResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response create(String json) {
         Booking entity = JsonbBuilder.create().fromJson(json, Booking.class);
+        if (!store.isUnique(entity)) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .header("caused-by", "Prenotazione esistente")
+                    .build();
+        }
         Event event = eventStore.find(eventId).orElseThrow(() -> new NotFoundException());
         entity.setEvent(event);
-        Booking saved = store.save(entity);
+        Booking saved = store.create(entity);
         return Response
                 .status(Response.Status.CREATED)
                 .entity(JsonbBuilder.create().toJson(saved))

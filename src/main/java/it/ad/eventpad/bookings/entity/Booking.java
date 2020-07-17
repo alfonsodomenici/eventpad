@@ -22,8 +22,8 @@ import javax.validation.constraints.NotNull;
  */
 @Entity
 @Table(name = "booking")
-public class Booking extends AbstractEntity{
-    
+public class Booking extends AbstractEntity {
+
     @JsonbTypeAdapter(EventLinkAdapter.class)
     @ManyToOne
     @NotNull
@@ -38,6 +38,7 @@ public class Booking extends AbstractEntity{
     @NotEmpty
     private String email;
     private boolean confermato;
+    private String code;
 
     public Booking() {
     }
@@ -49,11 +50,10 @@ public class Booking extends AbstractEntity{
         this.tel = tel;
         this.email = email;
     }
-    
+
     /*
     getter/setter
-    */
-
+     */
     public Event getEvent() {
         return event;
     }
@@ -101,6 +101,13 @@ public class Booking extends AbstractEntity{
     public void setConfermato(boolean confermato) {
         this.confermato = confermato;
     }
-    
-    
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
 }

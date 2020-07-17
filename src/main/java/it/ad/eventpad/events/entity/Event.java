@@ -115,4 +115,13 @@ public class Event extends AbstractEntity {
         this.descrizione = descrizione;
     }
 
+    public String getOra() {
+        return ora;
+    }
+
+    public void setOra(String ora) {
+        this.ora = ora;
+    }
+
+    
 }

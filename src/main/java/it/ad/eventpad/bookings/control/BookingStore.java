@@ -11,6 +11,8 @@ import it.ad.eventpad.events.entity.Event;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -31,11 +33,18 @@ public class BookingStore {
 
     @Inject
     EventStore eventStore;
-    
-    public Booking save(Booking entity) {
+
+    public Booking create(Booking entity) {
+        if(!isUnique(entity)){
+            throw new EJBException("Prenotazione già effettuata");
+        }
         Booking saved = em.merge(entity);
         eventStore.addBooking(saved.getEvent().getId());
         return saved;
+    }
+    
+    public Booking save(Booking entity) {
+        return em.merge(entity);
     }
 
     public void remove(Long id) {
@@ -50,15 +59,39 @@ public class BookingStore {
                 .executeUpdate();
         eventStore.resetBooking(eventId);
     }
-    
+
     public Optional<Booking> find(Long id) {
         Booking found = em.find(Booking.class, id);
         return found == null ? Optional.empty() : Optional.of(found);
+    }
+
+    public Optional<Booking> find(String nome, String cognome, String tel) {
+        List<Booking> result = em.createQuery("select e from Booking e where e.nome= :nome and e.cognome= :cognome and e.tel= :tel",Booking.class)
+                .setParameter("nome",nome)
+                .setParameter("cognome", cognome)
+                .setParameter("tel", tel)
+                .getResultList();
+        return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
+    }
+    
+    public Optional<Booking> confirm(Long id) {
+        Optional<Booking> found = find(id);
+        if (found.isEmpty()) {
+            return found;
+        }
+        Booking entity = found.get();
+        entity.setConfermato(true);
+        entity.setCode(UUID.randomUUID().toString());
+        return Optional.of(save(entity));
     }
 
     public List<Booking> byEvent(Long eventId) {
         return em.createQuery("select e from Booking e where e.event.id= :eventId", Booking.class)
                 .setParameter("eventId", eventId)
                 .getResultList();
+    }
+
+    public boolean isUnique(Booking entity) {
+        return find(entity.getNome(),entity.getCognome(),entity.getTel()).isEmpty();
     }
 }

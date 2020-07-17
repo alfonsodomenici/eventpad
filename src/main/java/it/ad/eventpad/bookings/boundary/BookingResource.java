@@ -12,6 +12,8 @@ import javax.json.bind.JsonbBuilder;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -34,6 +36,14 @@ public class BookingResource {
         return Response.ok(JsonbBuilder.create().toJson(data)).build();
     }
 
+    @PUT
+    @Path("confirm")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response confirm() {
+        Booking data = store.confirm(id).orElseThrow(() -> new NotFoundException());
+        return Response.ok(JsonbBuilder.create().toJson(data)).build();
+    }
+    
     @DELETE
     public Response delete() {
         store.remove(id);
