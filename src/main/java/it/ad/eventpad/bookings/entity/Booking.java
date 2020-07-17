@@ -35,7 +35,6 @@ public class Booking extends AbstractEntity {
     @NotEmpty
     private String tel;
     @Email
-    @NotEmpty
     private String email;
     private boolean confermato;
     private String code;
