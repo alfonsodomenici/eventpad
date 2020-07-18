@@ -9,6 +9,9 @@ import it.ad.eventpad.bookings.boundary.BookingsResource;
 import it.ad.eventpad.bookings.control.BookingStore;
 import it.ad.eventpad.events.control.EventStore;
 import it.ad.eventpad.events.entity.Event;
+import javax.annotation.security.DenyAll;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
@@ -23,6 +26,7 @@ import javax.ws.rs.core.Response;
  *
  * @author alfonso
  */
+
 public class EventResource {
 
     @Context
@@ -36,13 +40,14 @@ public class EventResource {
 
     private Long id;
 
+    @PermitAll
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response find() {
         Event data = store.find(id).orElseThrow(() -> new NotFoundException());
         return Response.ok(data).build();
     }
-
+    
     @Path("bookings")
     public BookingsResource bookings() {
         BookingsResource sub = resource.getResource(BookingsResource.class);

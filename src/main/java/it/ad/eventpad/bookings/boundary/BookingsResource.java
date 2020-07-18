@@ -10,6 +10,8 @@ import it.ad.eventpad.bookings.entity.Booking;
 import it.ad.eventpad.events.control.EventStore;
 import it.ad.eventpad.events.entity.Event;
 import java.util.List;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.json.bind.JsonbBuilder;
 import javax.ws.rs.Consumes;
@@ -29,6 +31,7 @@ import javax.ws.rs.core.Response;
  *
  * @author alfonso
  */
+@PermitAll
 public class BookingsResource {
 
     @Context
@@ -65,6 +68,7 @@ public class BookingsResource {
                 .build();
     }
 
+    @RolesAllowed("admin")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response all() {
@@ -79,6 +83,7 @@ public class BookingsResource {
         return sub;
     }
 
+    @RolesAllowed("admin")
     @DELETE
     public Response deleteAll() {
         store.removeByEvent(eventId);
